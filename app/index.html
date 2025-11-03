@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="id">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Pro-Mekari Procurement Demo</title>
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <header>
+      <h1>Pro-Mekari Procurement Demo</h1>
+      <p>
+        Demo aplikasi C-Procurement cerdas berbasis Mekari Officeless untuk memantau
+        anggaran, mengelola vendor, mengotomatisasi persetujuan multi-level, dan
+        mengendalikan siklus procure-to-pay secara menyeluruh.
+      </p>
+    </header>
+    <nav>
+      <button data-target="dashboard-view" class="active">Dasbor</button>
+      <button data-target="budgets-view">Anggaran</button>
+      <button data-target="vendors-view">Vendor</button>
+      <button data-target="requisition-view">Permintaan</button>
+      <button data-target="approvals-view">Persetujuan</button>
+      <button data-target="po-view">Purchase Order</button>
+      <button data-target="analytics-view">Analitik</button>
+      <button data-target="config-view">Konfigurasi</button>
+    </nav>
+    <main>
+      <section id="dashboard-view" class="view active">
+        <div class="section-grid">
+          <div class="card">
+            <div class="section-header">
+              <h2>Status Anggaran & Pengadaan</h2>
+              <p>Ikhtisar real-time dana, pipeline PR/PO, dan kesehatan vendor.</p>
+            </div>
+            <div class="metrics-grid" id="dashboard-metrics"></div>
+          </div>
+          <div class="card">
+            <div class="section-header">
+              <h2>Tindakan Prioritas</h2>
+              <p>Persetujuan yang menunggu, permintaan mendesak, dan tugas lanjutan.</p>
+            </div>
+            <div id="dashboard-actions" class="list-grid"></div>
+          </div>
+        </div>
+      </section>
+
+      <section id="budgets-view" class="view">
+        <div class="section-grid two-column">
+          <div class="card">
+            <div class="section-header">
+              <h2>Buat Anggaran</h2>
+              <p>Definisikan batasan dan periode kontrol biaya lintas departemen.</p>
+            </div>
+            <form id="budget-form">
+              <div>
+                <label for="budget-name">Nama Anggaran</label>
+                <input id="budget-name" name="name" placeholder="Anggaran Hardware IT 2024" required />
+              </div>
+              <div class="flex flex-wrap">
+                <div style="flex: 1 1 220px;">
+                  <label for="budget-department">Departemen</label>
+                  <select id="budget-department" name="departmentId" required></select>
+                </div>
+                <div style="flex: 1 1 220px;">
+                  <label for="budget-category">Kategori</label>
+                  <select id="budget-category" name="categoryId" required></select>
+                </div>
+              </div>
+              <div class="flex flex-wrap">
+                <div style="flex: 1 1 220px;">
+                  <label for="budget-allocation">Nilai Alokasi (IDR)</label>
+                  <input id="budget-allocation" name="allocation" type="number" min="0" step="1000" required />
+                </div>
+                <div style="flex: 1 1 220px;">
+                  <label for="budget-start">Mulai</label>
+                  <input id="budget-start" name="startDate" type="date" required />
+                </div>
+                <div style="flex: 1 1 220px;">
+                  <label for="budget-end">Selesai</label>
+                  <input id="budget-end" name="endDate" type="date" required />
+                </div>
+              </div>
+              <div>
+                <label for="budget-description">Deskripsi</label>
+                <textarea id="budget-description" name="description" placeholder="Prioritas perangkat keras dan jaringan" ></textarea>
+              </div>
+              <button type="submit" class="primary">Simpan Anggaran</button>
+            </form>
+          </div>
+          <div class="card">
+            <div class="section-header">
+              <h2>Ringkasan Anggaran</h2>
+              <p>Monitor saldo tersisa dan komitmen pengadaan aktif.</p>
+            </div>
+            <div id="budget-table" class="table-wrapper"></div>
+          </div>
+        </div>
+      </section>
+
+      <section id="vendors-view" class="view">
+        <div class="section-grid two-column">
+          <div class="card">
+            <div class="section-header">
+              <h2>Registrasi Vendor</h2>
+              <p>Bangun database vendor terkurasi beserta kategori kompetensi.</p>
+            </div>
+            <form id="vendor-form">
+              <div>
+                <label for="vendor-name">Nama Vendor</label>
+                <input id="vendor-name" name="name" placeholder="PT Mitra Digital" required />
+              </div>
+              <div>
+                <label for="vendor-email">Email</label>
+                <input id="vendor-email" name="email" type="email" placeholder="kontak@vendor.co.id" required />
+              </div>
+              <div class="flex flex-wrap">
+                <div style="flex: 1 1 220px;">
+                  <label for="vendor-phone">Telepon</label>
+                  <input id="vendor-phone" name="phone" placeholder="+62 812 1234 5678" />
+                </div>
+                <div style="flex: 1 1 220px;">
+                  <label for="vendor-contact">Kontak Utama</label>
+                  <input id="vendor-contact" name="contactPerson" placeholder="Nama kontak" />
+                </div>
+              </div>
+              <div>
+                <label for="vendor-address">Alamat</label>
+                <textarea id="vendor-address" name="address" placeholder="Alamat lengkap kantor"></textarea>
+              </div>
+              <div>
+                <label for="vendor-categories">Kategori Layanan</label>
+                <select id="vendor-categories" name="categories" multiple size="5"></select>
+                <p class="small">Tahan tombol Ctrl (Windows) atau Command (Mac) untuk memilih multi kategori.</p>
+              </div>
+              <button type="submit" class="primary">Simpan Vendor</button>
+            </form>
+          </div>
+          <div class="card">
+            <div class="section-header">
+              <h2>Direktori Vendor</h2>
+              <p>Nilai kinerja, kontak, dan cakupan kategori vendor terintegrasi.</p>
+            </div>
+            <div id="vendor-table" class="table-wrapper"></div>
+          </div>
+        </div>
+      </section>
+
+      <section id="requisition-view" class="view">
+        <div class="section-grid">
+          <div class="card">
+            <div class="section-header">
+              <h2>Permintaan Pembelian</h2>
+              <p>Formulir PR dinamis dengan pengecekan anggaran dan lampiran item.</p>
+            </div>
+            <form id="requisition-form">
+              <div class="flex flex-wrap">
+                <div style="flex: 1 1 220px;">
+                  <label for="requestor">Pemohon</label>
+                  <select id="requestor" name="requestorId" required></select>
+                </div>
+                <div style="flex: 1 1 220px;">
+                  <label for="req-department">Departemen</label>
+                  <select id="req-department" name="departmentId" required></select>
+                </div>
+                <div style="flex: 1 1 220px;">
+                  <label for="req-category">Kategori</label>
+                  <select id="req-category" name="categoryId" required></select>
+                </div>
+              </div>
+              <div class="flex flex-wrap">
+                <div style="flex: 1 1 220px;">
+                  <label for="req-vendor">Vendor Utama</label>
+                  <select id="req-vendor" name="vendorId" required></select>
+                </div>
+                <div style="flex: 1 1 220px;">
+                  <label for="req-budget">Sumber Anggaran</label>
+                  <select id="req-budget" name="budgetId" required></select>
+                </div>
+                <div style="flex: 1 1 220px;">
+                  <label for="req-needed">Tanggal Butuh</label>
+                  <input id="req-needed" name="neededBy" type="date" required />
+                </div>
+              </div>
+              <div>
+                <label for="req-justification">Justifikasi Bisnis</label>
+                <textarea id="req-justification" name="justification" placeholder="Tujuan pengadaan dan dampak yang diharapkan" required></textarea>
+              </div>
+              <div class="card" style="background: #f8fafc; border: 1px dashed var(--border);">
+                <h3>Daftar Item</h3>
+                <div class="flex flex-wrap">
+                  <div style="flex: 2 1 220px;">
+                    <label for="item-desc">Deskripsi Item</label>
+                    <input id="item-desc" placeholder="Laptop Ultrabook 14 inci" />
+                  </div>
+                  <div style="flex: 1 1 120px;">
+                    <label for="item-qty">Qty</label>
+                    <input id="item-qty" type="number" min="1" step="1" value="1" />
+                  </div>
+                  <div style="flex: 1 1 160px;">
+                    <label for="item-price">Harga Satuan (IDR)</label>
+                    <input id="item-price" type="number" min="0" step="1000" />
+                  </div>
+                </div>
+                <div class="inline-actions" style="margin-top: 12px;">
+                  <button type="button" class="primary" id="add-item-btn" style="padding: 8px 16px;">Tambah Item</button>
+                  <span class="small" id="req-total">Total: IDR 0</span>
+                </div>
+                <div id="items-list" class="list-grid" style="margin-top: 16px;"></div>
+              </div>
+              <button type="submit" class="primary">Kirim Permintaan</button>
+            </form>
+          </div>
+          <div class="card">
+            <div class="section-header">
+              <h2>Pipeline Permintaan</h2>
+              <p>Status persetujuan, saldo anggaran, dan jejak audit lengkap.</p>
+            </div>
+            <div id="requisition-table" class="table-wrapper"></div>
+          </div>
+        </div>
+      </section>
+
+      <section id="approvals-view" class="view">
+        <div class="card">
+          <div class="section-header">
+            <h2>Antrian Persetujuan</h2>
+            <p>Matriks persetujuan dinamis dan riwayat keputusan setiap level.</p>
+          </div>
+          <div id="approvals-list" class="list-grid"></div>
+        </div>
+      </section>
+
+      <section id="po-view" class="view">
+        <div class="section-grid">
+          <div class="card">
+            <div class="section-header">
+              <h2>Purchase Order & Penerimaan</h2>
+              <p>Konversi PR, penerimaan barang, dan pencatatan faktur 3-way match.</p>
+            </div>
+            <div id="po-table" class="table-wrapper"></div>
+          </div>
+          <div class="card">
+            <div class="section-header">
+              <h2>Detail Transaksi</h2>
+              <p>Riwayat aktivitas untuk PO yang dipilih dan tindakan lanjutan.</p>
+            </div>
+            <div id="po-detail"></div>
+          </div>
+        </div>
+      </section>
+
+      <section id="analytics-view" class="view">
+        <div class="section-grid">
+          <div class="card">
+            <div class="section-header">
+              <h2>Insight Anggaran & Vendor</h2>
+              <p>Analisis tren pengeluaran, kecepatan siklus, dan kualitas pemasok.</p>
+            </div>
+            <div id="analytics-content" class="list-grid"></div>
+          </div>
+        </div>
+      </section>
+
+      <section id="config-view" class="view">
+        <div class="section-grid">
+          <div class="card">
+            <div class="section-header">
+              <h2>Blueprint Officeless</h2>
+              <p>Struktur entitas, aturan persetujuan, dan reset data demo.</p>
+            </div>
+            <div class="list-grid" id="config-content"></div>
+            <div class="alert" style="margin-top: 16px;">
+              <strong>Tip Integrasi:</strong> Struktur data dan aturan di atas siap diadaptasi ke Mekari Officeless melalui App Builder, Workflow Builder, dan tabel native User/Position.
+            </div>
+            <button id="reset-demo" class="primary" style="margin-top: 16px;">Reset Data Demo</button>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <script type="module" src="./app.js"></script>
+  </body>
+</html>
